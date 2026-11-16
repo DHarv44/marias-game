@@ -42,10 +42,10 @@ const FESTIVALS=[
 ];
 /* Life moments: bonus blossoms that aren't holidays. inst/key left out = the era's own. */
 FESTIVALS.push(
-  {id:'harvest',set:'rain',name:"Grandpa's Ponds",line:'Early morning at the ponds, nets out, everybody helping.',
+  {id:'harvest',set:'rain',name:"Grandfather's Pools",line:'Early morning at the pools, nets out, everybody helping.',
    inst:'pan',motif:'garden',her:[1,1],colors:5,sig:2,
    recipe:()=>({types:['fish'],masks:['river1','lake'],forcePrimary:'fish',secondaryChance:0}),
-   tip:'A bonus blossom: bring the fish home to the ponds.',
+   tip:'A bonus blossom: bring the fish home to the pools.',
    pal:Object.assign({},CHAPTERS[0].pal,{accent:'#2F7F86'}),
    cheers:{combo:'Nuff nuff!',goal:'Full net!',win:'Gi Jack he jacket!'}},
   {id:'gotcha',name:'Gotcha Day',line:'The day she came home.',motif:'gotcha',her:[.3,.3],colors:5,sig:4,

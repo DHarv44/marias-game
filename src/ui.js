@@ -1073,7 +1073,7 @@ async function showHelp(){
     <div class="row">${I({k:'lineH',c:0})}<p><b>4 in a row</b> makes a Beam, which sweeps its whole line.</p></div>
     <div class="row">${I({k:'nova',c:2})}<p>An <b>L or T</b> makes a Nova, which blasts a diamond around it.</p></div>
     <div class="row">${I({k:'prism'})}<p><b>5 in a row</b> makes a Prism. Swap it with any piece to clear every one of that kind.</p></div>
-    <div class="row">${I({k:'fish'})}<p>Fish swim toward the pond. Clear the pieces in their way to bring them home.</p></div>
+    <div class="row">${I({k:'fish'})}<p>Fish swim toward the pool. Clear the pieces in their way to bring them home.</p></div>
     <div class="row">${I({k:'crystal'})}<p>Clear pieces on ice to break it.</p></div>
     <div class="row">${I({k:'boulder',col:'#F08A63'})}<p>Rocks crack when you match beside them.</p></div>
     <div class="row">${I({k:'patch',q})}<p>Clear a piece on a stitched square to sew in a patch.</p></div>

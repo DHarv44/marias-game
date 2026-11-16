@@ -252,7 +252,7 @@ function destroyAt(i,opts){
   patchAt(i);
 }
 
-// Fish swim: after each move every fish slips one cell toward the pond, trading places with the shape below.
+// Fish swim: after each move every fish slips one cell toward the pool, trading places with the shape below.
 function fishSwim(){
   let moved=false;
   for(const L of lineList())for(let k=1;k<L.length;k++){

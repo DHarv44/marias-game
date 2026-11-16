@@ -138,7 +138,7 @@ const RAIN=[
   {moves:20,goals:[{t:'collect',c:0,n:14},{t:'collect',c:2,n:14}],tip:'Line up 4 to make a Beam. When it clears, it sweeps its whole line.'},
   {moves:20,layout:MASKS.stilts,goals:[{t:'score',n:1400}],tip:'The board takes the shape it likes. Pieces fall down through the gaps.'},
   {moves:20,layout:FISHA,fish:{n:3,max:2,rate:.12},goals:[{t:'fish',n:3}],
-    tip:'Fish drift down as the board clears. Clear the pieces beneath them to bring them home to the pond.'},
+    tip:'Fish drift down as the board clears. Clear the pieces beneath them to bring them home to the pool.'},
   {moves:22,fish:{n:5,max:2,rate:.12},goals:[{t:'fish',n:5},{t:'collect',c:3,n:12}]},
   {moves:22,layout:RIVER2,fish:{n:5,max:2,rate:.13},goals:[{t:'fish',n:5}]},
   {moves:22,goals:[{t:'collect',c:1,n:18},{t:'collect',c:4,n:18}],tip:'Match in an L or T shape to make a Nova. It blasts a diamond around itself.'},
@@ -147,7 +147,7 @@ const RAIN=[
   {moves:25,fish:{n:8,max:3,rate:.16},goals:[{t:'fish',n:8}]},
   {moves:25,layout:RIVER1,fish:{n:6,max:3,rate:.14},goals:[{t:'fish',n:6},{t:'collect',c:0,n:14},{t:'collect',c:3,n:14}]},
   {moves:30,boss:{row:3,x:2,need:70},fish:{n:6,max:2,rate:.1},goals:[{t:'boss'}],big:true,
-    tip:'Something large is swimming in the pond. Make matches beside it, or bring it fish, until it is full.'},
+    tip:'Something large is swimming in the pool. Make matches beside it, or bring it fish, until it is full.'},
 ];
 const CROWN={moves:36,colors:6,
   layout:['........','.pp..pp.','pppppppp','pppppppp','.pppppp.','..pppp..','...pp...','........'],
