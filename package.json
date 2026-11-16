@@ -1,11 +1,15 @@
 {
   "name": "marias-game",
+  "version": "1.0.0",
   "private": true,
   "description": "Maria's Game: a match-3 told as one life, built into a single offline HTML file.",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "build": "python3 scripts/build.py",
-    "test:smoke": "python3 tests/smoke.py",
-    "test:story": "node tests/story.js 8",
-    "test:bonus": "node tests/bonus.js 8"
+    "build": "node scripts/build.mjs",
+    "start": "node server.mjs",
+    "test": "node --test \"tests/*.test.mjs\"",
+    "balance": "node tests/story.js 8 && node tests/bonus.js 8"
   }
 }

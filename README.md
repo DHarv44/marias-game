@@ -2,29 +2,35 @@
 
 A match-3 game for Maria, told as a Tree of Life: seven branches, eighty leaves, then open sky. Each branch has its own pieces, palette, board shapes, music and cheers. Four dogs join along the way as helpers, and bonus rounds open as surprises.
 
-The whole game ships as one self-contained HTML file. It has no server, no network calls and no dependencies at runtime, and it runs offline. Progress is saved in the browser's `localStorage`.
+The game itself is one self-contained HTML file. It makes no network calls, has no runtime dependencies and runs offline. Progress is saved in the browser's `localStorage`.
 
-## Play
+## Run
 
-Open `dist/index.html` in a browser, or host it on any static host (GitHub Pages, Netlify, S3). On a phone, "Add to Home Screen" runs it full screen.
-
-## Build
+Needs Node 22 or later. There are no dependencies to install.
 
 ```sh
-python3 scripts/build.py            # writes dist/index.html
+npm run build      # writes dist/index.html, the whole game in one file
+npm start          # serves it on $PORT (default 3000)
 ```
 
-The build inlines the fonts, art and scripts from `src/` into `src/shell.html`. It needs Python 3 and nothing else.
+`dist/index.html` also works opened straight from disk, offline. On a phone, "Add to Home Screen" runs it full screen.
+
+The server (`server.mjs`) serves only the game page and `/healthz`. It compresses with brotli or gzip and revalidates with an ETag, so each deploy shows up on the next load. It sends a Content Security Policy that allows the page's own inline scripts by hash and nothing else.
+
+## Deploy (Railway)
+
+Railway builds this with Railpack and needs no config file. It runs `npm ci`, then `npm run build`, then `npm start`, and the server listens on the `PORT` Railway provides. In the service settings, set the healthcheck path to `/healthz` and generate a public domain.
+
+Any host that runs Node works the same way. For a static host, run `npm run build` and publish `dist/`.
 
 ## Test
 
 ```sh
-node tests/story.js 8 [from] [to]   # bot plays each story leaf 8 times, prints win rates
-node tests/bonus.js 8               # same for every bonus round
-python3 tests/smoke.py              # loads dist/index.html in headless Chromium (needs Playwright)
+npm test           # build checks, server checks, and every leaf and bonus round played once headless
+npm run balance    # bots play each leaf and bonus round 8 times and print win rates
 ```
 
-The bots run the engine headless and deterministically, without animation. Use them after any change to levels or rules. Aim for every leaf to win at least about 75% of the time.
+Run the balance bots after any change to levels or rules. Aim for every leaf to win at least about 75% of the time. CI runs `npm test` on every push and pull request.
 
 ## Layout
 
@@ -38,8 +44,9 @@ The bots run the engine headless and deterministically, without animation. Use t
 | `src/ui.js` | Rendering, animation, sound, screens, saving. |
 | `src/shell.html` | Page skeleton and CSS with build placeholders. |
 | `assets/fonts/` | Rozha One and Mulish (latin subsets) with their licenses. |
-| `scripts/build.py` | Single-file build. |
-| `tests/` | Headless bots and a browser smoke test. |
+| `scripts/build.mjs` | Single-file build. |
+| `server.mjs` | Production server: compression, caching, CSP, health check. |
+| `tests/` | Node test suite and the balance bots. |
 
 ## Fonts
 
