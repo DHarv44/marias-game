@@ -6,7 +6,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 
 /* ---------- storage ---------- */
 const SAVE_KEY='mariasgame.save.v1';
-const save={level:1,stars:{},best:{},dogs:[],chaptersSeen:[],daily:{},bonus:{},bonusSeen:[],treats:0,endlessBest:0,sound:true,haptics:true,seenHelp:false,crownSeen:false};
+const save={level:1,stars:{},best:{},dogs:[],chaptersSeen:[],daily:{},bonus:{},bonusSeen:[],treats:0,endlessBest:0,sound:true,haptics:true,crownSeen:false};
 try{const raw=localStorage.getItem(SAVE_KEY);if(raw)Object.assign(save,JSON.parse(raw));}catch(e){}
 function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
 const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
@@ -940,23 +940,22 @@ function show(id){
   if(id==='home')refreshHome();
   if(id==='map'){resetTheme();buildTree();}
 }
-async function chapterCard(n){
+// A new branch opens with its pattern on the level card itself: one screen before play, never a stack of them.
+// The rules are taught a step at a time by each leaf's tip; the full list stays under Help and in the pause menu.
+function chapterIntro(n){
   const {ch,idx}=chapterOf(n);
-  if(idx!==1||save.chaptersSeen.includes(ch.id))return;
+  if(idx!==1||save.chaptersSeen.includes(ch.id))return null;
   save.chaptersSeen.push(ch.id);persist();
-  const pal=ch.pal;
-  const body=`<div class="motif-tile" style="background-color:${pal.bg};background-image:${motifURI(ch.motif,pal,heritageAt(n),false,ch.dark).replace(/"/g,"'")}"></div>
-    <div class="swatches">${[pal.accent,pal.motif,pal.motif2,pal.rock].map(c=>`<i style="background:${c}"></i>`).join('')}</div>`;
-  await modal({title:esc(ch.name),sub:esc(ch.line),body,buttons:[{label:'Begin',style:'primary',value:1}]});
+  return {ch,tile:`<div class="motif-tile" style="background-color:${ch.pal.bg};background-image:${motifURI(ch.motif,ch.pal,heritageAt(n),false,ch.dark).replace(/"/g,"'")}"></div>`};
 }
 async function openLevel(n){
   Snd.unlock();
-  if(!save.seenHelp){await showHelp();save.seenHelp=true;persist();}
-  await chapterCard(n);
+  const intro=chapterIntro(n);
   const L=getLevel(n);
-  const body=`<div class="glist">${L.goals.map(g=>`<div class="gl"><img src="${goalIcon(g,L)}" alt="">${esc(goalLabel(g,L))}</div>`).join('')}</div>
+  const body=`${intro?intro.tile:''}<div class="glist">${L.goals.map(g=>`<div class="gl"><img src="${goalIcon(g,L)}" alt="">${esc(goalLabel(g,L))}</div>`).join('')}</div>
     ${L.tip?`<div class="tip${L.chapter.id==='rain'?' slate':''}">${esc(L.tip)}</div>`:''}`;
-  const v=await modal({title:'Level '+n,sub:`${esc(L.chapter.name)}, ${L.moves} moves`,body,buttons:[{label:'Start',style:'primary',value:'go'},{label:'The tree',style:'ghost',value:'back'}]});
+  const head=intro?{title:esc(intro.ch.name),sub:`${esc(intro.ch.line)}<br>Level ${n}, ${L.moves} moves`}:{title:'Level '+n,sub:`${esc(L.chapter.name)}, ${L.moves} moves`};
+  const v=await modal({...head,body,buttons:[{label:'Start',style:'primary',value:'go'},{label:'The tree',style:'ghost',value:'back'}]});
   if(v==='go')startLevel(n);else show('map');
 }
 function startLevel(n){const L=getLevel(n);setupBoard(L,'journey',hashStr('maria-board-'+n+'-v'+ENGINE_VERSION));enterGame();}
@@ -984,7 +983,6 @@ async function surpriseBonus(n){
 }
 async function openBonus(n){
   Snd.unlock();
-  if(!save.seenHelp){await showHelp();save.seenHelp=true;persist();}
   const L=bonusLevel(n,save.level),f=L.chapter;
   const goals=`<div class="glist">${L.goals.map(g=>`<div class="gl"><img src="${goalIcon(g,L)}" alt="">${esc(goalLabel(g,L))}</div>`).join('')}</div>`;
   const v=await modal({title:esc(f.name),sub:esc(f.line),body:festCard(f,0)+goals+`<div class="tip">A bonus blossom, ${L.moves} moves. It never blocks the way; play it whenever you like.</div>`,
@@ -1109,7 +1107,7 @@ $('#btnContinue').onclick=()=>{Snd.unlock();playSound('click');openLevel(save.le
 $('#btnTree').onclick=()=>{Snd.unlock();playSound('click');show('map');};
 $('#btnDaily').onclick=()=>{Snd.unlock();playSound('click');startDaily();};
 $('#btnEndless').onclick=()=>{Snd.unlock();playSound('click');startEndless();};
-$('#btnHelp').onclick=()=>{Snd.unlock();playSound('click');showHelp().then(()=>{save.seenHelp=true;persist();});};
+$('#btnHelp').onclick=()=>{Snd.unlock();playSound('click');showHelp();};
 $('#tglSound').onclick=()=>{Snd.unlock();save.sound=!save.sound;persist();refreshHome();playSound('click');};
 $('#tglHaptic').onclick=()=>{save.haptics=!save.haptics;persist();refreshHome();buzz(20);};
 window.addEventListener('resize',()=>{if(curScreen==='game')resize();if(curScreen==='map')buildTree();});
