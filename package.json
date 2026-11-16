@@ -1,0 +1,11 @@
+{
+  "name": "marias-game",
+  "private": true,
+  "description": "Maria's Game: a match-3 told as one life, built into a single offline HTML file.",
+  "scripts": {
+    "build": "python3 scripts/build.py",
+    "test:smoke": "python3 tests/smoke.py",
+    "test:story": "node tests/story.js 8",
+    "test:bonus": "node tests/bonus.js 8"
+  }
+}

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F8ECF2">
+<title>Maria's Game</title>
+<style>
+/*__FONTS__*/
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F8ECF2; --bg2:#EED7E3; --panel:#FFF8FB; --ink:#4A2340; --muted:#7A4A66; --line:rgba(74,35,64,.14);
+  --accent:#8C3F6A; --frame:#E7C9D8; --pink:#D9468A; --gold:#E59A3A; --violet:#9562D2;
+  --display:'Rozha One',Georgia,serif; --ui:'Mulish',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;background:var(--bg)}
+body{height:100%;margin:0;position:relative;background:var(--bg);color:var(--ink);font-family:var(--ui);
+  overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-touch-callout:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+button:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;
+  padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.screen.show{display:flex}
+.display{font-family:var(--display);font-weight:400}
+
+/* Buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 20px;border-radius:26px;
+  background:var(--panel);color:var(--ink);font-weight:800;font-size:17px;border:1.5px solid var(--frame);transition:transform .08s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#FFF8FB}
+.btn.big{min-height:68px;flex-direction:column;gap:0;font-size:22px;font-family:var(--display);font-weight:400}
+.btn.big small{font-family:var(--ui);font-size:13px;font-weight:700;opacity:.85}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.ibtn{width:44px;height:44px;flex:none;border-radius:50%;background:var(--panel);border:1.5px solid var(--frame);display:grid;place-items:center;color:var(--accent)}
+.ibtn svg{width:18px;height:18px}
+
+/* Home */
+#home{justify-content:center;overflow:hidden}
+.home-inner{position:relative;z-index:1;display:flex;flex-direction:column;gap:12px;width:min(330px,86vw)}
+.emblem{display:flex;justify-content:center;margin-bottom:2px}
+.emblem svg{width:190px;height:190px}
+.home-inner h1{margin:0 0 12px;text-align:center;font-family:var(--display);font-weight:400;font-size:48px;line-height:1}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.surprise{position:fixed;inset:0;z-index:60;background:var(--sb);color:var(--si);display:grid;place-items:center;overflow:hidden;animation:spJolt .5s cubic-bezier(.3,1.8,.5,1)}
+.surprise.out{animation:spOut .45s ease-in forwards}
+.sp-bg{position:absolute;inset:0;background-size:120px 120px;opacity:.9;animation:spDrift 6s linear infinite}
+.sp-in{position:relative;text-align:center;padding:0 24px}
+.sp-burst{position:relative;width:140px;height:140px;margin:0 auto 10px}
+.sp-hero{position:absolute;inset:0;width:140px;height:140px;animation:spHero .9s cubic-bezier(.2,1.6,.4,1) both}
+.sp-bit{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px;opacity:0;animation:spBit 1.4s cubic-bezier(.15,.8,.3,1) forwards}
+.sp-flash{position:absolute;inset:0;background:#fff;pointer-events:none;animation:spFlash .5s ease-out forwards}
+.sp-ring{position:absolute;left:50%;top:0;width:140px;height:140px;margin-left:-70px;border-radius:50%;border:6px solid var(--sa);opacity:0;animation:spRing .8s .08s ease-out}
+.sp-name{font-family:var(--display);font-size:clamp(34px,10vw,52px);line-height:1.05;margin:6px 0 8px;animation:spUp .55s .4s both}
+.sp-line{font:600 15px var(--ui);opacity:.85;max-width:300px;margin:0 auto;animation:spUp .55s .55s both}
+@keyframes spJolt{0%{opacity:0;transform:scale(1.18)}35%{opacity:1;transform:scale(.97) rotate(-1.2deg)}60%{transform:scale(1.02) rotate(.8deg)}100%{transform:none}}
+@keyframes spFlash{0%{opacity:.95}100%{opacity:0}}
+@keyframes spRing{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(2.6)}}
+@keyframes spOut{to{opacity:0;transform:scale(.96)}}
+@keyframes spDrift{to{background-position:120px 60px}}
+@keyframes spHero{0%{transform:scale(0) rotate(-30deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes spBit{0%{opacity:0;transform:translate(0,0) scale(.3) rotate(0)}15%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1) rotate(var(--r))}}
+@keyframes spUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.bonusb{position:absolute;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;padding:0;border:2px solid var(--fa);background:var(--fb);display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:pointer;z-index:2}
+.bonusb img,.bonusb svg{width:28px;height:28px}
+.bonusb i{position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);font-style:normal;font-size:9px;color:#E59A3A;letter-spacing:-.5px;white-space:nowrap}
+.bonusb.shut{border:2px dashed #C9A0B8;background:#F8EEF3;filter:grayscale(1);opacity:.45;cursor:default}
+.bonusb:not(.got):not(.shut){animation:bonuspulse 2.4s ease-in-out infinite}
+@keyframes bonuspulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--fa) 40%,transparent)}50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--fa) 0%,transparent)}}
+.btn.fest{min-height:46px;padding:6px 16px;background:var(--fb);color:var(--fi);border:2px dashed var(--fa);display:flex;flex-direction:column;align-items:center;gap:2px}
+.btn.fest.on{border-style:solid;box-shadow:0 0 0 3px color-mix(in srgb,var(--fa) 25%,transparent)}
+.btn.fest small{font-size:11px;opacity:.8;font-weight:700}
+.fstars{color:#E59A3A;margin-left:.4em;letter-spacing:.05em}
+.toggles{display:flex;gap:8px;justify-content:center;margin-top:2px}
+.tgl{padding:9px 14px;border-radius:999px;background:var(--bg2);font-size:13px;font-weight:700;color:var(--muted)}
+.tgl b{color:var(--ink)}
+.toran{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-around;pointer-events:none}
+
+/* Map */
+.bar{width:100%;max-width:520px;display:flex;align-items:center;gap:12px;padding:12px 16px;position:relative;z-index:2;background:var(--bg)}
+.bar h2{margin:0;font-family:var(--display);font-weight:400;font-size:26px;flex:1;line-height:1}
+.bar .total{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;background:var(--panel);border:1px solid var(--frame);font-weight:800;font-size:15px}
+.tree-scroll{width:100%;max-width:520px;flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative}
+.tree{position:relative;width:100%}
+.tree svg.trunk{position:absolute;left:0;top:0}
+.leaf{position:absolute;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;display:grid;place-items:center}
+.leaf.locked{pointer-events:none}
+.leaf .num{font-weight:800;font-size:14px}
+.leaf.current{background:var(--panel);border:3px solid var(--pink);box-shadow:0 0 0 6px rgba(217,70,138,.15)}
+.bough{position:absolute;transform:translate(-50%,-50%);padding:6px 14px;border-radius:999px;font-family:var(--display);font-size:17px;white-space:nowrap;border:1.5px dotted currentColor;line-height:1.1}
+.mapdog{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:var(--panel);display:grid;place-items:center;border:1.5px solid var(--pink)}
+.mapdog.unmet{background:transparent;border:1.5px dashed #C9A0B8}
+.pin{position:absolute;width:36px;height:46px;margin:-62px 0 0 -18px;pointer-events:none}
+.map-foot{width:100%;max-width:520px;display:flex;align-items:center;gap:12px;padding:10px 16px 14px;background:var(--bg);border-top:1px solid var(--line)}
+.map-foot .btn{flex:1}
+.dogrow{display:flex;gap:4px}
+.dogrow .d{width:34px;height:34px;border-radius:50%;background:var(--panel);border:1.5px solid var(--frame);display:grid;place-items:center}
+.dogrow .d.unmet{background:transparent;border-style:dashed;border-color:#C9A0B8}
+
+/* Game (variables are re-pointed per branch) */
+#game{background-color:var(--bg);background-repeat:repeat;background-size:120px 120px}
+.hud{width:100%;max-width:520px;display:grid;grid-template-columns:48px 1fr 72px;align-items:center;gap:8px;padding:10px 14px 2px}
+.titlebox{text-align:center;line-height:1.05}
+.titlebox .k{font-size:13px;font-weight:800;color:var(--muted)}
+.titlebox b{display:block;font-family:var(--display);font-weight:400;font-size:28px}
+.moves{width:66px;height:66px;border-radius:50%;background:var(--panel);border:2px dotted var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.moves b{font-family:var(--display);font-weight:400;font-size:28px;font-variant-numeric:tabular-nums}
+.moves span{font-size:11px;font-weight:800;color:var(--muted)}
+.moves.low b{color:#C23C4E;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.14)}}
+.goalrow{width:100%;max-width:520px;display:flex;align-items:center;gap:10px;padding:8px 14px 0}
+.goals{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.goal{display:flex;align-items:center;gap:5px;padding:3px 11px 3px 4px;border-radius:999px;background:var(--panel);border:1px solid var(--frame);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+.goal img{width:26px;height:26px}
+.goal.done{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+.goal.bump{animation:bump .25s}
+@keyframes bump{50%{transform:scale(1.14)}}
+.scorebox{text-align:right;line-height:1}
+.scorebox .k{font-size:11px;font-weight:800;color:var(--muted)}
+.scorebox b{font-family:var(--display);font-weight:400;font-size:22px;font-variant-numeric:tabular-nums}
+.sbar{position:relative;width:96px;height:6px;border-radius:3px;background:var(--bg2);margin-top:12px}
+.sbar>i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--accent);width:0;transition:width .35s}
+.sbar .st{position:absolute;top:-13px;font-size:11px;transform:translateX(-50%);color:var(--line);line-height:1}
+.sbar .st.on{color:var(--gold)}
+#boardWrap{position:relative;flex:1;min-height:0;width:100%;max-width:520px;display:flex;align-items:center;justify-content:center;padding:6px}
+.frame{position:relative;padding:5px;border-radius:26px;border:3px dotted var(--accent)}
+.frame-in{border-radius:20px;border:1.5px solid var(--accent);background:var(--panel);padding:3px}
+.paisley{position:absolute;width:30px;height:30px;pointer-events:none;color:var(--accent)}
+.paisley.tl{left:-13px;top:-13px}.paisley.tr{right:-13px;top:-13px;transform:scaleX(-1)}
+.paisley.bl{left:-13px;bottom:-13px;transform:scaleY(-1)}.paisley.br{right:-13px;bottom:-13px;transform:scale(-1,-1)}
+#board{touch-action:none;display:block}
+.callout{position:absolute;left:50%;top:44%;pointer-events:none;font-family:var(--display);font-size:38px;white-space:nowrap;opacity:0;
+  transform:translate(-50%,-50%);text-shadow:0 2px 0 var(--panel),0 -2px 0 var(--panel),2px 0 0 var(--panel),-2px 0 0 var(--panel)}
+.callout.go{animation:callout .95s ease-out}
+@keyframes callout{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}
+  20%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}35%{transform:translate(-50%,-50%) scale(1)}
+  75%{opacity:1}100%{opacity:0;transform:translate(-50%,-75%) scale(1)}}
+.cheer{position:absolute;pointer-events:none;font-family:var(--display);font-size:34px;line-height:1.1;white-space:nowrap;z-index:6;opacity:0;
+  transform:translate(-50%,-50%) scale(.45);will-change:transform,opacity;
+  text-shadow:0 2px 0 var(--panel),0 -2px 0 var(--panel),2px 0 0 var(--panel),-2px 0 0 var(--panel),0 4px 10px rgba(0,0,0,.12)}
+.cheer .x{font-family:var(--ui);font-weight:800;font-size:.6em;margin-left:.25em;vertical-align:.3em}
+.banner{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);pointer-events:none;text-align:center;opacity:0;
+  font-family:var(--display);font-size:38px;padding:12px 0;background:var(--accent);color:var(--panel)}
+.banner.go{animation:banner 1.3s ease-in-out}
+@keyframes banner{0%{opacity:0;clip-path:inset(50% 0)}15%{opacity:1;clip-path:inset(0 0)}80%{opacity:1;clip-path:inset(0 0)}100%{opacity:0;clip-path:inset(50% 0)}}
+.toolhint{min-height:20px;font-size:13px;font-weight:800;color:var(--muted);text-align:center}
+.dock{width:100%;max-width:520px;min-height:64px;display:flex;align-items:flex-end;gap:10px;padding:2px 14px 12px}
+.dogs{display:flex;gap:6px}
+.dogbtn{position:relative;width:46px;height:46px;flex:none;border-radius:50%;background:var(--panel);border:1.5px solid var(--frame);display:grid;place-items:center}
+.dogbtn svg{width:40px;height:40px}
+.dogbtn .chg{position:absolute;right:-1px;top:-1px;width:14px;height:14px;border-radius:50%;background:var(--gold);border:2px solid var(--panel)}
+.dogbtn.spent{opacity:.4}.dogbtn.spent .chg{display:none}
+.dogbtn .treat{display:none;position:absolute;right:-4px;top:-4px}.dogbtn.canTreat{opacity:.75}.dogbtn.canTreat .treat{display:block}
+.treats{align-self:center;display:flex;align-items:center;gap:4px;font:800 13px var(--ui);color:var(--muted)}
+.help .row>svg{flex:none;width:34px;height:34px}
+.dogbtn.sel{border:3px solid var(--pink);box-shadow:0 0 0 5px rgba(217,70,138,.18)}
+.fluxbox{flex:1;display:flex;justify-content:flex-end;min-width:0}
+.fluxbox.off,.fluxrow.off{visibility:hidden}
+.fluxrow{width:100%;max-width:520px;display:flex;align-items:center;gap:10px;padding:0 14px 6px}
+.fluxrow .lbl{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;min-width:36px}
+.fbar{flex:1;height:10px;border-radius:5px;background:var(--bg2);overflow:hidden}
+.fbar i{display:block;height:10px;width:0;border-radius:5px;background:var(--violet);transition:width .35s}
+.tilts{display:flex;gap:4px}
+.tilts button{width:36px;height:36px;flex:none;border-radius:50%;background:var(--panel);border:1px solid var(--frame);display:grid;place-items:center;color:var(--muted);opacity:.45}
+.tilts button svg{width:15px;height:15px}
+.tilts.ready button{opacity:1;background:var(--accent);color:var(--panel);border-color:var(--accent);animation:ready 1.5s ease-in-out infinite}
+.tilts button.cur{box-shadow:inset 0 0 0 2px var(--muted)}
+.tilts button.deny{animation:deny .3s}
+@keyframes ready{50%{transform:translateY(-3px)}}
+@keyframes deny{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* Modal */
+#modal{position:absolute;inset:0;background:rgba(40,20,40,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#modal.show{display:flex}
+.card{position:relative;width:min(360px,100%);max-height:100%;overflow-y:auto;background:#FFF8FB;color:#4A2340;border-radius:28px;padding:26px 20px 20px;
+  border:3px dotted #8C3F6A;box-shadow:0 20px 50px rgba(0,0,0,.25);animation:cardIn .25s ease-out;text-align:center}
+@keyframes cardIn{from{transform:translateY(16px) scale(.96);opacity:0}}
+.card h2{margin:0;font-family:var(--display);font-weight:400;font-size:32px;line-height:1.1}
+.card .sub{color:#7A4A66;font-weight:700;font-size:15px;margin-top:4px}
+.mbody{margin:14px 0 18px;font-size:15px;line-height:1.45}
+.mbtns{display:flex;flex-direction:column;gap:10px}
+.card .btn{border-color:#E7C9D8;background:#FFF8FB;color:#4A2340}
+.card .btn.primary{background:#8C3F6A;border-color:#8C3F6A;color:#FFF8FB}
+.card .btn.ghost{background:transparent;border-color:transparent;color:#7A4A66}
+.glist{display:flex;flex-direction:column;gap:8px;text-align:left}
+.gl{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:16px;background:#F6E4EE;font-weight:800}
+.gl img{width:32px;height:32px;flex:none}
+.tip.slate{background:#2F4A3F;color:#F4F1E8;border:5px solid #9C6B3E;border-radius:10px;font-family:'Mulish',sans-serif;font-weight:700;letter-spacing:.01em}
+.tip{margin-top:12px;padding:10px 12px;border-radius:16px;border:1.5px dashed #D9B5C9;color:#6E4560;font-size:14px;font-weight:600;text-align:left}
+.stars{display:flex;justify-content:center;gap:10px;font-size:52px;line-height:1;margin:6px 0 4px}
+.stars span{color:#EED7E3}
+.stars span.on{color:#E59A3A;animation:starIn .5s cubic-bezier(.3,1.7,.5,1) both}
+@keyframes starIn{from{transform:scale(.2) rotate(-40deg)}}
+.big-score{font-family:var(--display);font-size:30px;font-variant-numeric:tabular-nums}
+.hero{display:flex;justify-content:center;gap:8px;margin:4px 0 10px}
+.swatches{display:flex;justify-content:center;gap:8px;margin:12px 0 4px}
+.swatches i{width:22px;height:22px;border-radius:50%;display:block}
+.motif-tile{height:90px;border-radius:18px;margin-top:10px;background-size:120px 120px}
+.help{text-align:left;display:flex;flex-direction:column;gap:12px}
+.help .row{display:flex;gap:12px;align-items:center}
+.help img{width:40px;height:40px;flex:none}
+.help p{margin:0;font-size:14px;line-height:1.38}
+@media (prefers-reduced-motion: reduce){
+  .tilts.ready button,.moves.low b{animation:none}
+}
+@media (max-height:660px){
+  .moves{width:56px;height:56px}.moves b{font-size:24px}.emblem svg{width:130px;height:130px}.home-inner h1{font-size:40px}
+}
+</style>
+</head>
+<body>
+
+<section id="home" class="screen show">
+  <div class="toran" id="toran" aria-hidden="true"></div>
+  <div class="home-inner">
+    <div class="emblem" id="emblem"></div>
+    <h1>Maria's Game</h1>
+    <button class="btn primary big" id="btnContinue">Continue<small id="contLabel">Garden City</small></button>
+    <button class="btn" id="btnTree">The tree</button>
+    <div class="row2"><button class="btn" id="btnDaily">Today's leaf</button><button class="btn" id="btnEndless">Endless</button></div>
+    <button class="btn ghost" id="btnHelp">How to play</button>
+    <div class="toggles">
+      <button class="tgl" id="tglSound">Sound <b>On</b></button>
+      <button class="tgl" id="tglHaptic">Vibration <b>On</b></button>
+    </div>
+  </div>
+</section>
+
+<section id="map" class="screen">
+  <div class="bar">
+    <button class="ibtn" id="mapBack" aria-label="Back"></button>
+    <h2>Maria's Journey</h2>
+    <span class="total" id="starTotal"></span>
+  </div>
+  <div class="tree-scroll" id="treeScroll"><div class="tree" id="tree"></div></div>
+  <div class="map-foot">
+    <div class="dogrow" id="mapDogs"></div>
+    <button class="btn primary" id="mapPlay">Play</button>
+  </div>
+</section>
+
+<section id="game" class="screen">
+  <header class="hud">
+    <button class="ibtn" id="btnPause" aria-label="Pause"></button>
+    <div class="titlebox"><span class="k" id="hudK">Garden City</span><b id="hudLevel">Level 1</b></div>
+    <div class="moves" id="movesBox"><b id="hudMoves">20</b><span>moves</span></div>
+  </header>
+  <div class="goalrow">
+    <div class="goals" id="goals"></div>
+    <div class="scorebox"><span class="k">Score</span><br><b id="hudScore">0</b>
+      <div class="sbar" id="sbar"><i id="sbarFill"></i><span class="st" id="st1">★</span><span class="st" id="st2">★</span><span class="st" id="st3">★</span></div>
+    </div>
+  </div>
+  <div id="boardWrap">
+    <div class="frame" id="frame">
+      <div class="frame-in"><canvas id="board"></canvas></div>
+    </div>
+    <div class="callout" id="callout"></div>
+    <div class="banner" id="banner"></div>
+  </div>
+  <div class="toolhint" id="toolHint" aria-live="polite"></div>
+  <div class="fluxrow" id="fluxRow"><span class="lbl" id="fluxHint">Flux</span><div class="fbar"><i id="fluxFill"></i></div></div>
+  <footer class="dock">
+    <div class="dogs" id="dogDock"></div>
+    <div class="fluxbox" id="fluxBox">
+      <div class="tilts" id="tilts">
+        <button data-dir="left" aria-label="Tilt left"></button>
+        <button data-dir="up" aria-label="Tilt up"></button>
+        <button data-dir="down" aria-label="Tilt down"></button>
+        <button data-dir="right" aria-label="Tilt right"></button>
+      </div>
+    </div>
+  </footer>
+</section>
+
+<div id="modal" role="dialog" aria-modal="true"></div>
+
+<script id="engine">
+/*__ENGINE__*/
+</script>
+<script id="levels">
+/*__LEVELS__*/
+</script>
+<script id="ui">
+/*__UI__*/
+</script>
+</body>
+</html>
